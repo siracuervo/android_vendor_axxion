@@ -219,98 +219,42 @@ endif
 
 PRODUCT_PACKAGE_OVERLAYS += vendor/axxion/overlay/common
 
-PRODUCT_VERSION_MAJOR = 11
-PRODUCT_VERSION_MINOR = 0
-PRODUCT_VERSION_MAINTENANCE = 0-RC0
+# version
+RELEASE = false
+AXXION_VERSION_MAJOR = 1.0
+AXXION_VERSION_MINOR = 0
 
-# Set axxion_BUILDTYPE from the env RELEASE_TYPE, for jenkins compat
-
-ifndef axxion_BUILDTYPE
-    ifdef RELEASE_TYPE
-        # Starting with "axxion_" is optional
-        RELEASE_TYPE := $(shell echo $(RELEASE_TYPE) | sed -e 's|^axxion_||g')
-        axxion_BUILDTYPE := $(RELEASE_TYPE)
-    endif
-endif
-
-# Filter out random types, so it'll reset to UNOFFICIAL
-ifeq ($(filter RELEASE NIGHTLY SNAPSHOT EXPERIMENTAL,$(axxion_BUILDTYPE)),)
-    axxion_BUILDTYPE :=
-endif
-
-ifdef axxion_BUILDTYPE
-    ifneq ($(axxion_BUILDTYPE), SNAPSHOT)
-        ifdef axxion_EXTRAVERSION
-            # Force build type to EXPERIMENTAL
-            axxion_BUILDTYPE := EXPERIMENTAL
-            # Remove leading dash from axxion_EXTRAVERSION
-            axxion_EXTRAVERSION := $(shell echo $(axxion_EXTRAVERSION) | sed 's/-//')
-            # Add leading dash to axxion_EXTRAVERSION
-            axxion_EXTRAVERSION := -$(axxion_EXTRAVERSION)
-        endif
-    else
-        ifndef axxion_EXTRAVERSION
-            # Force build type to EXPERIMENTAL, SNAPSHOT mandates a tag
-            axxion_BUILDTYPE := EXPERIMENTAL
-        else
-            # Remove leading dash from axxion_EXTRAVERSION
-            axxion_EXTRAVERSION := $(shell echo $(axxion_EXTRAVERSION) | sed 's/-//')
-            # Add leading dash to axxion_EXTRAVERSION
-            axxion_EXTRAVERSION := -$(axxion_EXTRAVERSION)
-        endif
-    endif
+# release
+ifeq ($(RELEASE),true)
+    AXXION_VERSION_STATE := OFFICIAL
+    AXXION_VERSION := AXXION-v$(AXXION_VERSION_MAJOR).$(AXXION_VERSION_MINOR)-$(AXXION_VERSION_STATE)
 else
-    # If axxion_BUILDTYPE is not defined, set to UNOFFICIAL
-    axxion_BUILDTYPE := UNOFFICIAL
-    axxion_EXTRAVERSION :=
-endif
-
-ifeq ($(axxion_BUILDTYPE), UNOFFICIAL)
-    ifneq ($(TARGET_UNOFFICIAL_BUILD_ID),)
-        axxion_EXTRAVERSION := -$(TARGET_UNOFFICIAL_BUILD_ID)
-    endif
-endif
-
-ifeq ($(axxion_BUILDTYPE), RELEASE)
-    ifndef TARGET_VENDOR_RELEASE_BUILD_ID
-        axxion_VERSION := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR).$(PRODUCT_VERSION_MAINTENANCE)$(PRODUCT_VERSION_DEVICE_SPECIFIC)-$(axxion_BUILD)
-    else
-        ifeq ($(TARGET_BUILD_VARIANT),user)
-            axxion_VERSION := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)-$(TARGET_VENDOR_RELEASE_BUILD_ID)-$(axxion_BUILD)
-        else
-            axxion_VERSION := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR).$(PRODUCT_VERSION_MAINTENANCE)$(PRODUCT_VERSION_DEVICE_SPECIFIC)-$(axxion_BUILD)
-        endif
-    endif
-else
-    ifeq ($(PRODUCT_VERSION_MINOR),0)
-        axxion_VERSION := $(PRODUCT_VERSION_MAJOR)-$(shell date -u +%Y%m%d)-$(axxion_BUILDTYPE)$(axxion_EXTRAVERSION)-$(axxion_BUILD)
-    else
-        axxion_VERSION := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)-$(shell date -u +%Y%m%d)-$(axxion_BUILDTYPE)$(axxion_EXTRAVERSION)-$(axxion_BUILD)
-    endif
+    AXXION_VERSION_STATE := $(shell date +%Y-%m-%d)
+    AXXION_VERSION := AXXION-v$(AXXION_VERSION_MAJOR).$(AXXION_VERSION_MINOR)-$(AXXION_VERSION_STATE)
 endif
 
 PRODUCT_PROPERTY_OVERRIDES += \
-  ro.axxion.version=$(axxion_VERSION) \
-  ro.modversion=$(axxion_VERSION) \
+  ro.axxion.version=$(AXXION_VERSION) \
+  ro.modversion=$(AXXION_VERSION) \
   ro.cmlegal.url=http://www.cyanogenmod.org/docs/privacy
 
 -include vendor/axxion-priv/keys/keys.mk
 
-axxion_DISPLAY_VERSION := $(axxion_VERSION)
+AXXION_DISPLAY_VERSION := $(AXXION_VERSION)
 
-ifneq ($(PRODUCT_DEFAULT_DEV_CERTIFICATE),)
-ifneq ($(PRODUCT_DEFAULT_DEV_CERTIFICATE),build/target/product/security/testkey)
-  ifneq ($(axxion_BUILDTYPE), UNOFFICIAL)
+ifneq ($(AXXION_DEFAULT_DEV_CERTIFICATE),)
+ifneq ($(AXXION_DEFAULT_DEV_CERTIFICATE),build/target/product/security/testkey)
+  ifneq ($(AXXION_BUILDTYPE), UNOFFICIAL)
     ifndef TARGET_VENDOR_RELEASE_BUILD_ID
- ifneq ($(axxion_EXTRAVERSION),)
-        TARGET_VENDOR_RELEASE_BUILD_ID := $(axxion_EXTRAVERSION)
+ ifneq ($(AXXION_EXTRAVERSION),)
+        TARGET_VENDOR_RELEASE_BUILD_ID := $(AXXION_EXTRAVERSION)
 else
         TARGET_VENDOR_RELEASE_BUILD_ID := -$(shell date -u +%Y%m%d)
 endif
 else
       TARGET_VENDOR_RELEASE_BUILD_ID := -$(TARGET_VENDOR_RELEASE_BUILD_ID)
 endif
-    axxion_DISPLAY_VERSION=$(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)$(TARGET_VENDOR_RELEASE_BUILD_ID)
+    AXXION_DISPLAY_VERSION=$(AXXION_VERSION_MAJOR).$(AXXION_VERSION_MINOR)$(TARGET_VENDOR_RELEASE_BUILD_ID)
 endif
 endif
 endif
