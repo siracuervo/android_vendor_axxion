@@ -1,1 +1,2 @@
 add_lunch_combo axxion_umts_spyder-userdebug
+add_lunch_combo axxion_gee-userdebug
