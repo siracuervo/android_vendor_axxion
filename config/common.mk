@@ -1,7 +1,5 @@
+# axxionkat
 PRODUCT_BRAND ?= AxxionKat
-
-SUPERUSER_EMBEDDED := true
-SUPERUSER_PACKAGE_PREFIX := com.android.settings.cyanogenmod.superuser
 
 ifneq ($(TARGET_SCREEN_WIDTH) $(TARGET_SCREEN_HEIGHT),$(space))
 # determine the smaller dimension
@@ -149,6 +147,17 @@ PRODUCT_PACKAGES += \
     LockClock \
     CMFota
 
+# superuser
+SUPERUSER_EMBEDDED := true
+
+PRODUCT_PACKAGES += \
+    Superuser \
+    su
+
+PRODUCT_COPY_FILES += \
+    external/koush/Superuser/init.superuser.rc:root/init.superuser.rc
+
+ 
 # axxion Hardware Abstraction Framework
 PRODUCT_PACKAGES += \
     org.cyanogenmod.hardware \
@@ -196,9 +205,7 @@ ifneq ($(TARGET_BUILD_VARIANT),user)
 
 PRODUCT_PACKAGES += \
     procmem \
-    procrank \
-    Superuser \
-    su
+    procrank 
 
 # Terminal Emulator
 PRODUCT_COPY_FILES +=  \
