@@ -1,7 +1,4 @@
-# axxionkat
 PRODUCT_BRAND ?= AxxionKat
-SUPERUSER_EMBEDDED := true
-SUPERUSER_PACKAGE_PREFIX := com.android.settings.cyanogenmod.superuser
 
 ifneq ($(TARGET_SCREEN_WIDTH) $(TARGET_SCREEN_HEIGHT),$(space))
 # determine the smaller dimension
@@ -194,12 +191,18 @@ PRODUCT_PACKAGES += \
 # These packages are excluded from user builds
 ifneq ($(TARGET_BUILD_VARIANT),user)
 
+# superuser
+SUPERUSER_EMBEDDED := true
+
 PRODUCT_PACKAGES += \
     procmem \
     procrank \
     Superuser \
     su
     
+PRODUCT_COPY_FILES += \
+    external/koush/Superuser/init.superuser.rc:root/init.superuser.rc
+
 # Terminal Emulator
 PRODUCT_COPY_FILES +=  \
     vendor/axxion/proprietary/Term.apk:system/app/Term.apk \
